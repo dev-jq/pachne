@@ -39,7 +39,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .t{font-size:11px;padding:2px 8px;border-radius:99px;background:var(--acs);color:var(--ac)}
 .t.s{background:var(--gds);color:var(--gd)}.t.w{background:#f3d9d6;color:var(--rd)}
 :root[data-theme="dark"] .t.w{background:#3d1f1c}
-.st-own{--c:light-dark(#1f8a4c,#4ccb81)}.st-wantbuy{--c:light-dark(#2f6fd0,#6aa3f5)}.st-wanttest{--c:light-dark(#2b9bd6,#6fc3f0)}.st-watch{--c:light-dark(#8a52c8,#b98af0)}.st-tested{--c:light-dark(#6b7a86,#9db0bd)}.st-had{--c:light-dark(#9a6b3f,#d09a62)}.st-again{--c:light-dark(#0e8f8f,#45cfcf)}.st-no{--c:light-dark(#c0443c,#f2807a)}.st-tryout{--c:light-dark(#d9822b,#f0a35e)}.st-comp{--c:light-dark(#c2185b,#f48fb1)}
+.st-own{--c:light-dark(#1f8a4c,#4ccb81)}.st-wantbuy{--c:light-dark(#2f6fd0,#6aa3f5)}.st-wanttest{--c:light-dark(#2b9bd6,#6fc3f0)}.st-watch{--c:light-dark(#8a52c8,#b98af0)}.st-tested{--c:light-dark(#6b7a86,#9db0bd)}.st-had{--c:light-dark(#9a6b3f,#d09a62)}.st-again{--c:light-dark(#0e8f8f,#45cfcf)}.st-no{--c:light-dark(#c0443c,#f2807a)}.st-tryout{--c:light-dark(#d9822b,#f0a35e)}.st-comp{--c:light-dark(#c2185b,#f48fb1)}.st-duel{--c:light-dark(#4458d8,#8da2ff)}
 .t[class*="st-"]{background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c);font-weight:600}
 .fab{position:fixed;right:max(16px,calc(50% - 344px));bottom:calc(70px + env(safe-area-inset-bottom,0px));width:56px;height:56px;border-radius:50%;background:var(--ac);color:#fff;border:0;font-size:30px;box-shadow:0 4px 14px #0004;cursor:pointer}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -65,7 +65,7 @@ input:disabled,select:disabled{opacity:.45;cursor:not-allowed}
 .empty{text-align:center;color:var(--mut);padding:30px}
 .foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
 </style></head><body>
-<header><h1>Pachnę</h1><button class="btn" onclick="toggleTheme()" aria-label="Zmień motyw">◐</button></header>
+<header><h1>Pachnę</h1><button class="btn" onclick="openSettings()" aria-label="Ustawienia">⚙</button></header>
 <nav id="nav"></nav><main id="main"></main>
 <button class="fab" onclick="edit()" aria-label="Dodaj zapach">+</button>
 <dialog id="dlg"></dialog>
@@ -85,12 +85,13 @@ const js=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const ppm=x=>x.ml>0&&x.price>0?x.price/x.ml:null;
 const fmt=n=>(Math.round(n*100)/100).toLocaleString('pl-PL',{minimumFractionDigits:2,maximumFractionDigits:2});
+function setTheme(n){document.documentElement.dataset.theme=n;try{localStorage.setItem('perf_theme',n)}catch(e){}}
 function toggleTheme(){const r=document.documentElement,n=r.dataset.theme==='dark'?'light':'dark';r.dataset.theme=n;try{localStorage.setItem('perf_theme',n)}catch(e){}}
-function nav(){const t=[['rank','Ranking'],['log','Dziennik'],['stats','Statystyki'],['sug','Sugestie']];
+function nav(){const t=[['rank','Ranking'],['log','Dziennik'],['duel','Pojedynki'],['stats','Statystyki'],...(SET.sug?[['sug','Sugestie']]:[])];
 $('nav').innerHTML=t.map(a=>`<button class="${view===a[0]?'on':''}" onclick="view='${a[0]}';render()">${a[1]}</button>`).join('')}
 function card(x,i){const r=x.rating;return `<div class="card ${r>=9?'top':''}" onclick="edit('${x.id}')"><div class="pos">${i<0?'·':i+1}</div>
 <div class="mid"><div class="br">${esc(x.brand)}</div><div class="nm">${esc(x.name)} ${x.conc?`<span class="br">${esc(x.conc)}</span>`:''}${x.fav?' ✨':''}</div>
-<div class="tags"><span class="t st-${x.status}">${ST[x.status]}</span>${x.type==='insp'||x.type==='clone'?`<span class="t s">${x.type==='clone'?'Klon':'Inspirowany'}${x.insp?' – '+esc(x.insp):''}</span>`:''}${x.source?`<span class="t s">${esc(x.source)}</span>`:''}${x.refill==='tak'?'<span class="t st-tested">Refill</span>':''}${(x.tags||[]).map(t=>`<span class="t">${esc(t)}</span>`).join('')}</div>${x.note?`<div class="note">📝 ${esc(x.note)}</div>`:''}</div>
+<div class="tags"><span class="t st-${x.status}">${ST[x.status]}</span>${x.type==='insp'||x.type==='clone'?`<span class="t s">${x.type==='clone'?'Klon':'Inspirowany'}${x.insp?' – '+esc(x.insp):''}</span>`:''}${x.source?`<span class="t s">${esc(x.source)}</span>`:''}${x.refill==='tak'?'<span class="t st-tested">Refill</span>':''}${(x.tags||[]).map(t=>`<span class="t">${esc(t)}</span>`).join('')}${duelBadge(x)}</div>${x.note?`<div class="note">📝 ${esc(x.note)}</div>`:''}</div>
 <div class="sc num">${r===''||r==null?'–':r}<small>${r===''||r==null?'':'/10'}</small>${ppm(x)?`<div class="ppm">${fmt(ppm(x))} zł/ml</div>`:''}${x.comp>0?`<div class="cbadge">💌 Komplement${x.comp>1?' ×'+x.comp:''}</div>`:''}</div></div>`}
 var legOpen=false;
 const LEG=[['Eleganckie','Zapachy podkreślające klasę i zadbany wygląd. Do koszuli, eleganckiego stylu smart casual, restauracji, spotkań biznesowych i bardziej formalnych wyjść.'],['Garniturowe','Zapachy pasujące do garnituru, smokingu i formalnego dress code\'u. Na ważne spotkania, gale, bankiety i uroczyste okazje. Liczy się charakter zapachu, nie tylko jego moc.'],['Sportowe','Świeże, energetyczne i swobodne zapachy. Na spacer, rower, aktywny dzień, luźne spotkania i nieformalne wyjścia. Nie oznacza to automatycznie zapachu przeznaczonego do intensywnego treningu.'],['Randka','Zapachy budujące atrakcyjną, zmysłową lub intrygującą aurę. Na romantyczne spotkania, kolację we dwoje i wieczór z partnerką. Ważne są odbiór z bliska i odpowiednia intensywność.'],['Uroczystość','Zapachy na wyjątkowe wydarzenia: wesele, święta, rodzinne uroczystości, jubileusze, ważne spotkania i eleganckie przyjęcia.'],['Weekend','Zapachy na wolny dzień: luźne wyjścia, zakupy, spacer, spotkania ze znajomymi, bez dress code\'u. W weekend losowanie „Czym dziś pachnieć?” chętniej je podpowiada.'],['Wiosna-Lato','Zapachy dobrze sprawdzające się w cieplejszej pogodzie. Często świeże, cytrusowe, wodne, zielone lub lekkie. Wysoka temperatura może wzmacniać projekcję, dlatego ważna jest również dawka.'],['Jesień-Zima','Zapachy często cieplejsze, głębsze i bardziej otulające: korzenne, drzewne, ambrowe, balsamiczne lub słodkie. Dobrze pasują do chłodu, choć nie każdy cięższy zapach jest odpowiedni na każdą okazję.'],['Całoroczne','Zapachy na różne pory roku i temperatury. Dobrze sprawdzają się w wielu sytuacjach bez konieczności czekania na konkretną porę roku. Nie oznacza to, że pasują do każdej okazji.']];
@@ -105,8 +106,9 @@ if(!D.length)return welcome();
 let L=D.filter(x=>flt==='all'||x.status===flt||(flt==='want'&&(x.status==='wantbuy'||x.status==='wanttest'))||(flt==='fav'&&x.fav)||(flt==='comp'&&x.comp)||(flt==='insp'&&(x.type==='insp'||x.type==='clone'))).filter(x=>!tag||(x.tags||[]).includes(tag)).filter(x=>!cflt||x.conc===cflt);
 const toks=sq(q).split(/\s+/).filter(Boolean);
 if(toks.length)L=L.filter(x=>{const h=hay(x);return toks.every(t=>h.includes(t))});
+window._DS=duelStats();const sc=x=>{const s=window._DS[x.id];return s?s.w-s.l:0};
 const R=x=>x.rating===''||x.rating==null?-1:+x.rating,P=x=>ppm(x);
-const srt={rating:(a,b)=>R(b)-R(a),ppmd:(a,b)=>(P(b)??-1)-(P(a)??-1)||R(b)-R(a),ppma:(a,b)=>(P(a)??1e9)-(P(b)??1e9)||R(b)-R(a),name:(a,b)=>(a.brand+' '+a.name).localeCompare(b.brand+' '+b.name,'pl'),comp:(a,b)=>(+b.comp||0)-(+a.comp||0)||R(b)-R(a)};
+const srt={rating:(a,b)=>R(b)-R(a)||sc(b)-sc(a),ppmd:(a,b)=>(P(b)??-1)-(P(a)??-1)||R(b)-R(a),ppma:(a,b)=>(P(a)??1e9)-(P(b)??1e9)||R(b)-R(a),name:(a,b)=>(a.brand+' '+a.name).localeCompare(b.brand+' '+b.name,'pl'),comp:(a,b)=>(+b.comp||0)-(+a.comp||0)||R(b)-R(a)};
 L.sort(srt[sortBy]||srt.rating);
 const act=q.trim()||flt!=='all'||tag||cflt;
 return `<p class="br" style="margin:2px 0 8px">${L.length} z ${D.length}${act?' • filtry aktywne':''}</p>`+(L.length?L.map((x,i)=>card(x,sortBy==='rating'?i:-1)).join(''):(q.trim()?`<div class="empty">Brak wyników dla „${esc(q.trim())}”. Zmień frazę lub wyczyść filtry.</div>`:'<div class="empty">Brak zapachów w tym filtrze. Dodaj nowy przyciskiem +.</div>'))}
@@ -128,6 +130,7 @@ return `<div class="grid"><div class="kpi"><b>${D.length}</b><span>zapachów w b
 <h2>Rozkład ocen</h2><div class="box">${bars(Object.entries(bk).sort((a,b)=>b[0]-a[0]).map(a=>[+a[0]>=10?'10':a[0]+'–'+(+a[0]+.5)+'+',a[1]]))}</div>
 <h2>Koszt za mililitr</h2><div class="box">${bars(pp.map(x=>[x.name,ppm(x)]),v=>fmt(v)+' zł')}</div>
 <h2>Odlewka kontra flakon</h2>${(()=>{const dec=D.filter(x=>x.source==='Odlewka'&&x.rating!==''&&x.rating!=null).sort((a,b)=>b.rating-a.rating);if(!dec.length)return '<div class="box br">Po przetestowaniu odlewki wpisz ocenę i źródło „Odlewka” – pojawi się tu rekomendacja.</div>';return dec.map(x=>{const r=+x.rating,v=r>=8.5?'Warto kupić pełny flakon':r>=6.5?'Zostań przy odlewce lub szukaj okazji':'Nie kupuj pełnego flakonu';const cls=r>=8.5?'st-own':r>=6.5?'st-want':'st-no';const a=ppm(x),b=x.fprice>0&&x.fml>0?x.fprice/x.fml:null;const c=a&&b?`Odlewka ${fmt(a)} zł/ml, flakon ${fmt(b)} zł/ml – odlewka jest ${a>b?'droższa':'tańsza'} o ${Math.round(Math.abs(a-b)/b*100)}% na ml.`:'Wpisz cenę i ml odlewki oraz cenę i ml pełnego flakonu, żeby zobaczyć różnicę.';return `<div class="sg"><div class="br">${esc(x.brand)}</div><div class="nm">${esc(x.name)} <span class="t ${cls}">${r}/10</span></div><p><b>${v}.</b> ${c}</p></div>`}).join('')})()}
+${duelStatsBlock()}
 <h2>Okazje</h2><div class="box">${bars(count(D.flatMap(x=>x.tags||[])))}</div>
 <h2>Oryginały vs inspirowane</h2><div class="box">${bars(count(D.map(x=>x.type==='insp'?'Inspirowane':x.type==='clone'?'Klony':'Oryginały')))}</div><h2>Źródło posiadania</h2><div class="box">${bars(count(D.map(x=>x.source)))}</div>
 <h2>Średnia ocena wg marki</h2><div class="box">${bars(Object.entries(D.filter(x=>x.rating!==''&&x.rating!=null).reduce((o,x)=>{(o[x.brand]=o[x.brand]||[]).push(+x.rating);return o},{})).map(([k,v])=>[k,v.reduce((a,b)=>a+b)/v.length]).sort((a,b)=>b[1]-a[1]),v=>fmt(v))}</div>`}
@@ -238,6 +241,49 @@ ${gaps.length?`<p class="br" style="margin:10px 0 0">Nie masz w domu zapachu na:
 <h2>Do przetestowania</h2>${top.length?top.map(o=>card(o,0)).join(''):'<div class="empty">Brak propozycji dla tego filtra. Zmień okazję lub budżet.</div>'}
 ${low.length?`<details style="margin-top:14px"><summary class="br" style="cursor:pointer">Raczej nie dla Ciebie (${low.length})</summary><div style="margin-top:8px">${low.map(o=>card(o,1)).join('')}</div></details>`:''}
 ${dis.length?`<p class="br" style="margin-top:14px">Ukryte propozycje: ${dis.length} <button class="btn" onclick="restoreDis()">Przywróć</button></p>`:''}`}
+let SET={sug:false};try{SET={...SET,...JSON.parse(localStorage.getItem('perf_settings')||'{}')}}catch(e){}
+function saveSet(){try{localStorage.setItem('perf_settings',JSON.stringify(SET))}catch(e){}}
+window.DUELS=load2('perf_duels');
+function saveDuels(){try{localStorage.setItem('perf_duels',JSON.stringify(window.DUELS))}catch(e){}}
+const dsid=v=>String(v==null?'':v).replace(/[^\w-]/g,'').slice(0,40);
+function cleanDuels(v){return Array.isArray(v)?v.filter(d=>d&&typeof d==='object'&&/^\d{4}-\d{2}-\d{2}$/.test(String(d.date))).map((d,i)=>({id:dsid(d.id)||'d'+Date.now()+'_'+i,a:dsid(d.a),b:dsid(d.b),w:dsid(d.w),date:String(d.date),note:String(d.note==null?'':d.note).slice(0,500)})).filter(d=>d.a&&d.b&&d.a!==d.b):null}
+function cleanSet(v){return v&&typeof v==='object'?{sug:!!v.sug}:null}
+function openSettings(){$('dlg').innerHTML=`<h2 style="margin-top:0">Ustawienia</h2><label>Motyw kolorystyczny</label><select id="s_theme" onchange="setTheme(this.value)"><option value="dark" ${document.documentElement.dataset.theme==='light'?'':'selected'}>Ciemny (domyślnie)</option><option value="light" ${document.documentElement.dataset.theme==='light'?'selected':''}>Jasny</option></select><label>Zakładka „Sugestie”</label><select id="s_sug" onchange="SET.sug=this.value==='1';saveSet();render()"><option value="0" ${SET.sug?'':'selected'}>Nie (domyślnie)</option><option value="1" ${SET.sug?'selected':''}>Tak</option></select><p class="br" style="margin:8px 0 0">Podpowiedzi zapachów dopasowane do Twoich ocen. Domyślnie ukryte.</p><div class="foot"><button class="btn" onclick="$('dlg').close()">Zamknij</button></div>`;$('dlg').showModal()}
+function duelStats(){const m={};(window.DUELS||[]).forEach(d=>{if(!D.some(x=>x.id===d.a)||!D.some(x=>x.id===d.b))return;m[d.a]=m[d.a]||{w:0,d:0,l:0};m[d.b]=m[d.b]||{w:0,d:0,l:0};if(!d.w){m[d.a].d++;m[d.b].d++}else if(d.w===d.a){m[d.a].w++;m[d.b].l++}else{m[d.b].w++;m[d.a].l++}});return m}
+function duelBadge(x){const s=(window._DS||{})[x.id];return s&&(s.w+s.l+s.d)?`<span class="t st-duel" title="Pojedynki: wygrane–przegrane">⚔ ${s.w}–${s.l}</span>`:''}
+const duelNm=id=>{const x=D.find(a=>a.id===id);return x?esc(x.brand)+' '+esc(x.name):'(usunięty zapach)'};
+function addDuel(res){const a=$('d_a').value,b=$('d_b').value,m=$('d_msg');
+if(!a||!b||a===b){m.textContent='Wybierz dwa różne zapachy.';return}
+window.DUELS.push({id:'d'+Date.now(),a,b,w:res==='a'?a:res==='b'?b:'',date:$('d_date').value||new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10),note:$('d_note').value.trim()});
+saveDuels();render()}
+function delDuel(id){window.DUELS=window.DUELS.filter(d=>d.id!==id);saveDuels();render()}
+function setDuel(a,b){$('d_a').value=a;$('d_b').value=b;$('d_a').scrollIntoView({behavior:'smooth',block:'center'})}
+function duelStatsBlock(){const DU=window.DUELS||[],DS=duelStats();
+const rows=Object.entries(DS).map(([id,s])=>({x:D.find(a=>a.id===id),s,n:s.w+s.l+s.d})).filter(o=>o.n>0).map(o=>({...o,p:o.s.w/o.n*100})).sort((a,b)=>b.p-a.p||b.n-a.n||b.s.w-a.s.w).slice(0,10);
+let h='<h2>Mistrzowie pojedynków</h2><div class="box">'+(rows.length?bars(rows.map(o=>[o.x.name+' '+o.s.w+'–'+o.s.l+(o.s.d?' +'+o.s.d+' remis':''),o.p]),v=>Math.round(v)+'%')+'<p class="br" style="margin:8px 0 0">Procent wygranych w rozegranych pojedynkach (remis nie jest wygraną). Przy małej liczbie pojedynków wynik jest orientacyjny.</p>':'<div class="br">Zapisz pierwsze pojedynki w zakładce Pojedynki.</div>')+'</div>';
+const ups=[];let ok=0,tot=0;
+DU.forEach(d=>{if(!d.w)return;const w=D.find(x=>x.id===d.w),l=D.find(x=>x.id===(d.w===d.a?d.b:d.a));if(!w||!l||w.rating===''||l.rating===''||w.rating==null||l.rating==null||+w.rating===+l.rating)return;tot++;if(+w.rating>+l.rating)ok++;else ups.push({d,w,l})});
+ups.sort((p,q)=>q.d.date.localeCompare(p.d.date));
+h+='<h2>Ocena kontra pojedynki</h2><div class="box">'+(tot?`<p style="margin:0 0 6px">Zgodne z oceną: <b>${ok} z ${tot}</b> pojedynków (wygrał zapach z wyższą oceną).</p>`+(ups.length?ups.slice(0,5).map(o=>`<div class="sg"><div class="nm" style="font-size:15px">${esc(o.w.name)} <span class="br">${o.w.rating}</span> pokonał ${esc(o.l.name)} <span class="br">${o.l.rating}</span></div><p>${esc(o.d.date)}${o.d.note?' • '+esc(o.d.note):''}</p></div>`).join('')+'<p class="br" style="margin:6px 0 0">To pojedynki wbrew ocenom. Sprawdź, czy ocena zwycięzcy nie jest za niska albo przegranego za wysoka.</p>':'<p class="br" style="margin:0">Wszystkie pojedynki zgodne z ocenami, nie ma nic do poprawienia.</p>'):'<div class="br">Brak pojedynków zapachów o różnych ocenach.</div>')+'</div>';
+return h}
+function duelsView(){const items=D.filter(x=>x.status==='own'||x.status==='tested').sort((x,y)=>(x.brand+' '+x.name).localeCompare(y.brand+' '+y.name,'pl'));
+const DU=window.DUELS||[],DS=duelStats();
+const td=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+const opts=()=>'<option value="">– wybierz zapach –</option>'+items.map(x=>`<option value="${x.id}">${esc(x.brand)} ${esc(x.name)}</option>`).join('');
+const form=items.length<2?'<div class="box br">Pojedynek wymaga co najmniej dwóch zapachów ze statusem Posiadam lub Testuję.</div>':`<div class="box"><label style="margin-top:0">Zapach A</label><select id="d_a">${opts(0)}</select><label>Zapach B</label><select id="d_b">${opts(1)}</select>
+<label>Notatka (opcjonalnie)</label><input id="d_note" placeholder="np. B mocniej i dłużej wyczuwalny">
+<label>Data</label><input id="d_date" type="date" value="${td}">
+<div class="foot" style="margin-top:12px"><button class="btn p" onclick="addDuel('a')">A wygrywa</button><button class="btn" onclick="addDuel('d')">Remis</button><button class="btn p" onclick="addDuel('b')">B wygrywa</button></div><p id="d_msg" class="br" style="margin:8px 0 0"></p></div>`;
+const done=new Set(DU.map(d=>[d.a,d.b].sort().join('|')));
+const rated=items.filter(x=>x.rating!==''&&x.rating!=null),pairs=[];
+for(let i=0;i<rated.length;i++)for(let j=i+1;j<rated.length;j++){const a=rated[i],b=rated[j],diff=Math.abs(+a.rating-+b.rating);if(diff<=.5&&!done.has([a.id,b.id].sort().join('|')))pairs.push({a,b,diff})}
+pairs.sort((p,q)=>p.diff-q.diff||(+q.a.rating+ +q.b.rating)-(+p.a.rating+ +p.b.rating));
+const todo=pairs.slice(0,5).map(p=>`<div class="sg"><div class="nm" style="font-size:15px">${esc(p.a.name)} <span class="br">${p.a.rating}</span> ⚔ ${esc(p.b.name)} <span class="br">${p.b.rating}</span></div><p>${esc(p.a.brand)} vs ${esc(p.b.brand)}${p.diff?'':' • taka sama ocena'}</p><button class="btn" onclick="setDuel('${p.a.id}','${p.b.id}')">Rozegraj</button></div>`).join('');
+const bil=Object.entries(DS).map(([id,s])=>({x:D.find(a=>a.id===id),s})).sort((p,q)=>(q.s.w-q.s.l)-(p.s.w-p.s.l)||q.s.w-p.s.w||(p.x.name).localeCompare(q.x.name,'pl'));
+const hist=[...DU].sort((p,q)=>q.date.localeCompare(p.date)||q.id.localeCompare(p.id));
+return form+`<h2>Do rozegrania</h2>${todo||'<div class="box br">Brak par o podobnej ocenie (różnica do 0,5), które jeszcze nie miały pojedynku.</div>'}
+<h2>Bilans</h2>${bil.length?bil.map(o=>`<div class="card" style="cursor:default"><div class="mid"><div class="br">${esc(o.x.brand)}</div><div class="nm">${esc(o.x.name)}</div></div><div class="sc num">${o.s.w}–${o.s.l}<small>${o.s.d?' • '+o.s.d+' remis':''}</small></div></div>`).join(''):'<div class="empty">Brak rozegranych pojedynków.</div>'}
+<h2>Historia</h2>${hist.length?hist.map(d=>`<div class="card" style="cursor:default"><div class="mid"><div class="br">${esc(d.date)}</div><div class="nm" style="font-size:15px">${duelNm(d.a)} ⚔ ${duelNm(d.b)}</div><div class="br" style="margin-top:3px">${d.w?'🏆 <b style="color:var(--ink)">'+duelNm(d.w)+'</b>':'Remis'}${d.note?' • <i>'+esc(d.note)+'</i>':''}</div></div><button class="btn d" onclick="delDuel('${d.id}')" aria-label="Usuń pojedynek">×</button></div>`).join(''):'<div class="empty">Jeszcze nic nie zapisane.</div>'}`}
 function edit(id){const x=D.find(a=>a.id===id)||{id:'u'+Date.now(),brand:'',name:'',conc:'',rating:'',status:'tested',fav:0,tags:[],source:'',ml:'',price:'',blotter:'',skin:'',dur:'',proj:'',_new:1};
 const v=k=>esc(x[k]??'');
 $('dlg').innerHTML=`<h2 style="margin-top:0">${x._new?'Nowy zapach':'Edytuj zapach'}</h2>
@@ -294,11 +340,11 @@ function delItem(id){const x=D.find(a=>a.id===id);if(!x)return;
 $('dlg').innerHTML=`<h2 style="margin-top:0">Usunąć zapach?</h2><div class="sg"><div class="br">${esc(x.brand)}</div><div class="nm">${esc(x.name)} ${esc(x.conc)}</div><p>Zapach zniknie z rankingu i statystyk. Wpisy w dzienniku zostaną, ale bez nazwy.</p></div><div class="foot"><button class="btn d" onclick="doDel('${id}')">Usuń</button><button class="btn" onclick="edit('${id}')">Anuluj</button></div>`}
 function doDel(id){D=D.filter(a=>a.id!==id);save();$('dlg').close();render()}
 function askReset(){$('dlg').innerHTML=`<h2 style="margin-top:0">Usunąć wszystkie dane?</h2><div class="sg"><p>Wszystkie zapachy, dziennik noszenia i ukryte sugestie zostaną usunięte z tej przeglądarki. Zrób najpierw kopię do pliku, jeśli chcesz mieć możliwość powrotu.</p></div><div class="foot"><button class="btn d" onclick="resetAll()">Usuń wszystko</button><button class="btn" onclick="$('dlg').close()">Anuluj</button></div>`;$('dlg').showModal()}
-function resetAll(){D=[];window.WEAR=[];window.DIS=[];save();saveWear();saveDis();$('dlg').close();render()}
+function resetAll(){D=[];window.WEAR=[];window.DIS=[];window.DUELS=[];save();saveWear();saveDis();saveDuels();$('dlg').close();render()}
 let pend=null,bmsg='',fbTxt='';
 function fstamp(){return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,16).replace('T','_').replace(':','-')}
 function stamp(){return new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10)}
-function backupData(){return{app:'moje-zapachy',version:1,exportedAt:new Date().toISOString(),perfumes:D,wear:window.WEAR||load2('perf_wear'),dismissed:window.DIS||[]}}
+function backupData(){return{app:'moje-zapachy',version:1,exportedAt:new Date().toISOString(),perfumes:D,wear:window.WEAR||load2('perf_wear'),dismissed:window.DIS||[],duels:window.DUELS||[],settings:SET}}
 function exportFile(){const txt=JSON.stringify(backupData(),null,1);
 try{const url=URL.createObjectURL(new Blob([txt],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='pachne-backup-'+fstamp()+'.json';document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),4000);
 try{localStorage.setItem('perf_lastbackup',stamp())}catch(e){}bmsg='Kopia zapisana – sprawdź folder Pobrane.'}catch(e){fbTxt=txt;bmsg='Nie udało się zapisać pliku. Skopiuj kopię jako tekst z pola poniżej i zachowaj ją w notatce.'}
@@ -313,10 +359,10 @@ function parseBackup(t){const j=JSON.parse(t);const p=Array.isArray(j)?j:(j&&j.p
 const seen=new Set(),P=p.map(cleanItem).map(x=>{while(seen.has(x.id))x.id+='x';seen.add(x.id);return x});
 const wear=(j&&Array.isArray(j.wear))?j.wear.filter(w=>w&&/^\d{4}-\d{2}-\d{2}$/.test(String(w.date))).map((w,i)=>({id:sid(w.id)||'w'+Date.now()+'_'+i,pid:sid(w.pid),date:String(w.date)})):null;
 const dis=(j&&Array.isArray(j.dismissed))?j.dismissed.filter(d=>typeof d==='string').map(cs):null;
-return{perfumes:P,wear,dis,at:(j&&typeof j.exportedAt==='string')?j.exportedAt.slice(0,30):''}}
+return{perfumes:P,wear,dis,duels:cleanDuels(j&&j.duels),settings:cleanSet(j&&j.settings),at:(j&&typeof j.exportedAt==='string')?j.exportedAt.slice(0,30):''}}
 function loadFile(inp){const f=inp.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{pend=parseBackup(String(r.result));bmsg=''}catch(e){pend=null;bmsg='To nie wygląda na plik kopii zapasowej.'}render()};r.readAsText(f)}
 function pasteImport(){const t=$('exp')?$('exp').value:'';try{pend=parseBackup(t);bmsg=''}catch(e){pend=null;bmsg='Niepoprawny tekst kopii.'}render()}
-function applyImport(){if(!pend)return;D=pend.perfumes;save();if(pend.wear){window.WEAR=pend.wear;saveWear()}if(pend.dis){window.DIS=pend.dis;saveDis()}pend=null;bmsg='Dane przywrócone.';render()}
+function applyImport(){if(!pend)return;D=pend.perfumes;save();if(pend.wear){window.WEAR=pend.wear;saveWear()}if(pend.dis){window.DIS=pend.dis;saveDis()}if(pend.duels){window.DUELS=pend.duels;saveDuels()}if(pend.settings){SET=pend.settings;saveSet()}pend=null;bmsg='Dane przywrócone.';render()}
 function backupBox(){let last=null;try{last=localStorage.getItem('perf_lastbackup')}catch(e){}
 const wn=(window.WEAR||load2('perf_wear')).length;
 return `<h2>Kopia zapasowa</h2><div class="box"><p class="br" style="margin:0 0 8px">W kopii: ${D.length} zapachów i ${wn} wpisów dziennika (oceny, ceny, notatki, statusy). Dane są tylko w tej przeglądarce – czyszczenie danych witryny, tryb prywatny lub inne urządzenie oznaczają start od zera, więc rób kopie. Ostatnia kopia: <b>${last?esc(last):'jeszcze nie robiono'}</b></p>
@@ -325,7 +371,7 @@ ${bmsg?`<p class="br" style="margin:0 0 8px">${esc(bmsg)}</p>`:''}
 ${pend?`<div class="sg"><b>Przywrócić z pliku?</b><p>Plik zawiera ${pend.perfumes.length} zapachów${pend.wear?' i '+pend.wear.length+' wpisów dziennika':''}${pend.at?' (kopia z '+esc(pend.at.slice(0,10))+')':''}. Obecne dane zostaną zastąpione.</p><button class="btn p" onclick="applyImport()">Przywróć</button> <button class="btn" onclick="pend=null;render()">Anuluj</button></div>`:''}
 <details ${fbTxt?'open':''}><summary class="br" style="cursor:pointer">Opcje zaawansowane</summary><div class="foot"><button class="btn" onclick="showTxt()">Pokaż kopię jako tekst</button><button class="btn" onclick="pasteImport()">Wczytaj wklejony tekst</button><button class="btn d" onclick="askReset()">Usuń wszystkie dane</button></div><textarea id="exp" rows="6" placeholder="Wklej tu kopię JSON" style="margin-top:8px">${esc(fbTxt)}</textarea></details></div>`}
 function fitChips(){[['f',more.f]].forEach(([k,o])=>{const el=$('c'+k),b=$('m'+k);if(!el||!b)return;b.style.display=(o||el.scrollHeight>el.clientHeight+2)?'block':'none'})}
-function render(){nav();$('main').innerHTML=(view==='rank'?rank():view==='log'?wearLog():view==='stats'?stats():sug())+(view==='stats'?backupBox():'');
+function render(){if(view==='sug'&&!SET.sug)view='rank';nav();$('main').innerHTML=(view==='rank'?rank():view==='log'?wearLog():view==='duel'?duelsView():view==='stats'?stats():(SET.sug?sug():rank()))+(view==='stats'?backupBox():'');
 fitChips();
 }
 render();
